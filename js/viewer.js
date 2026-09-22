@@ -133,22 +133,118 @@
     }
   };
 
-  function makeWeave() {
+  /* ------------------------------------------------------------------
+     Surfaces. A bump map made of random noise reads as coarse knitting,
+     so the cloth is built as a real plain weave instead: warp and weft
+     threads crossing over and under, turned into a normal map. The
+     threads are small and shallow, which is what stops it looking like
+     basketwork.
+     ------------------------------------------------------------------ */
+  function canvas2d(size) {
     var c = document.createElement("canvas");
-    c.width = c.height = 64;
-    var x = c.getContext("2d");
-    var img = x.createImageData(64, 64);
-    for (var i = 0; i < img.data.length; i += 4) {
-      var v = 110 + Math.floor(Math.random() * 90);
-      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-      img.data[i + 3] = 255;
+    c.width = c.height = size;
+    return c;
+  }
+  /* Height field -> tangent space normal map, wrapping at the edges. */
+  function heightToNormal(h, size, strength) {
+    var c = canvas2d(size), x = c.getContext("2d");
+    var img = x.createImageData(size, size), d = img.data;
+    function at(i, j) { return h[((j + size) % size) * size + ((i + size) % size)]; }
+    for (var j = 0; j < size; j++) {
+      for (var i = 0; i < size; i++) {
+        var dx = (at(i + 1, j) - at(i - 1, j)) * strength;
+        var dy = (at(i, j + 1) - at(i, j - 1)) * strength;
+        var len = Math.sqrt(dx * dx + dy * dy + 1);
+        var k = (j * size + i) * 4;
+        d[k] = Math.round((-dx / len * 0.5 + 0.5) * 255);
+        d[k + 1] = Math.round((-dy / len * 0.5 + 0.5) * 255);
+        d[k + 2] = Math.round((1 / len * 0.5 + 0.5) * 255);
+        d[k + 3] = 255;
+      }
     }
     x.putImageData(img, 0, 0);
     var t = new THREE.CanvasTexture(c);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(70, 70);
     return t;
   }
+  function makeWeaveNormal() {
+    var N = 256, h = new Float32Array(N * N), th = 8;
+    for (var j = 0; j < N; j++) {
+      for (var i = 0; i < N; i++) {
+        var u = (i % th) / th, v = (j % th) / th;
+        var over = (Math.floor(i / th) + Math.floor(j / th)) % 2 === 0;
+        var a = Math.sin(Math.PI * u), b = Math.sin(Math.PI * v);
+        /* the thread on top sits proud, the one beneath barely shows */
+        h[j * N + i] = (over ? a * 0.9 + b * 0.22 : b * 0.9 + a * 0.22)
+          + (Math.random() - 0.5) * 0.09;   /* slubs in the yarn */
+      }
+    }
+    return heightToNormal(h, N, 1.5);
+  }
+  /* Timber grain, running the length of the leg. */
+  function makeGrainNormal() {
+    var N = 256, h = new Float32Array(N * N);
+    for (var j = 0; j < N; j++) {
+      for (var i = 0; i < N; i++) {
+        var g = Math.sin(j * 0.32 + Math.sin(i * 0.045) * 2.4);
+        h[j * N + i] = g * 0.30 + (Math.random() - 0.5) * 0.10;
+      }
+    }
+    return heightToNormal(h, N, 0.7);
+  }
+  /* Gentle variation in sheen, so the cloth is not uniformly matt. */
+  function makeRoughness(base, spread) {
+    var N = 64, c = canvas2d(N), x = c.getContext("2d");
+    var img = x.createImageData(N, N), d = img.data;
+    for (var k = 0; k < d.length; k += 4) {
+      var v = Math.round(255 * clamp(base + (Math.random() - 0.5) * spread, 0, 1));
+      d[k] = d[k + 1] = d[k + 2] = v;
+      d[k + 3] = 255;
+    }
+    x.putImageData(img, 0, 0);
+    var t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+  }
+
+  /* ------------------------------------------------------------------
+     The room the piece is standing in. Nothing here is ever drawn: it is
+     blurred into an environment map, and that is what the fabric and the
+     timber reflect. Without it a standard material has nothing to catch
+     and reads as flat plastic, which is the single biggest reason a
+     render looks artificial.
+     ------------------------------------------------------------------ */
+  function makeEnvironment(renderer) {
+    var pm = new THREE.PMREMGenerator(renderer);
+    var env = new THREE.Scene();
+    function lit(hex, power) {
+      return new THREE.MeshBasicMaterial({
+        color: new THREE.Color(hex).convertSRGBToLinear().multiplyScalar(power),
+        side: THREE.DoubleSide
+      });
+    }
+    function panel(w, h, hex, power, x, y, z, rx, ry) {
+      var m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), lit(hex, power));
+      m.position.set(x, y, z);
+      m.rotation.set(rx || 0, ry || 0, 0);
+      env.add(m);
+    }
+    var room = new THREE.Mesh(new THREE.BoxGeometry(12, 7, 12), lit(0x9d9488, 0.55));
+    room.material.side = THREE.BackSide;
+    env.add(room);
+    panel(12, 12, 0x7a6f62, 0.35, 0, -3.4, 0, -Math.PI / 2);      /* floor bounce */
+    panel(12, 12, 0xffffff, 1.30, 0, 3.45, 0, Math.PI / 2);       /* ceiling */
+    panel(5.5, 4.2, 0xfff6ea, 3.00, -5.8, 0.9, 0.4, 0, Math.PI / 2);  /* window */
+    panel(4, 3, 0xdce6f2, 1.10, 5.8, 0.6, -1, 0, -Math.PI / 2);   /* cool fill */
+    panel(3.2, 2.4, 0xffe6c8, 1.40, 0.5, 0.4, -5.8);              /* warm front */
+    var rt = pm.fromScene(env, 0.04);
+    pm.dispose();
+    return rt.texture;
+  }
+
+  /* Colours in the palette are written as sRGB, which is what the
+     renderer now expects to be told explicitly. */
+  function srgb(col, hex) { col.set(hex); col.convertSRGBToLinear(); return col; }
 
   /* o: { stage, canvas, toolsEl?, hintEl?, onFail?, auto? } */
   WH.createViewer = function (o) {
@@ -165,6 +261,12 @@
     renderer.setClearColor(0x000000, 0);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    /* Work in linear light and convert once on the way out, then roll the
+       highlights off the way a camera does. Without these two lines the
+       picture comes out flat and washed. */
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.92;
 
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(32, 1, 0.1, 60);
@@ -174,8 +276,12 @@
     var auto = o.auto !== false && !WH.reduce;
     var grow = 1, onScreen = true, firstBuild = true, group = null;
 
-    scene.add(new THREE.HemisphereLight(0xfff3e4, 0x8a7563, 0.72));
-    var key = new THREE.DirectionalLight(0xffffff, 0.75);
+    /* The environment map now does most of the lighting, so these are
+       turned well down from where they were. The key light stays mainly
+       to cast the shadow that seats the piece on the floor. */
+    scene.environment = makeEnvironment(renderer);
+    scene.add(new THREE.HemisphereLight(0xfff3e4, 0x8a7563, 0.18));
+    var key = new THREE.DirectionalLight(0xffffff, 0.55);
     key.position.set(2.5, 4, 3);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
@@ -187,7 +293,7 @@
     key.shadow.camera.bottom = -3;
     key.shadow.bias = -0.0006;
     scene.add(key);
-    var fill = new THREE.DirectionalLight(0xffe8d0, 0.25);
+    var fill = new THREE.DirectionalLight(0xffe8d0, 0.12);
     fill.position.set(-3, 2, -2);
     scene.add(fill);
 
@@ -196,23 +302,44 @@
     floor.receiveShadow = true;
     scene.add(floor);
 
-    var rugMat = new THREE.MeshStandardMaterial({ color: 0xd6c5af, roughness: 1, metalness: 0 });
+    var rugMat = new THREE.MeshStandardMaterial({ roughness: 1, metalness: 0 });
+    srgb(rugMat.color, 0xd6c5af);
     var rug = new THREE.Mesh(new THREE.CircleGeometry(1, 72), rugMat);
     rug.rotation.x = -Math.PI / 2;
     rug.position.y = 0.002;
     rug.receiveShadow = true;
     scene.add(rug);
 
-    var weave = makeWeave();
+    var weave = makeWeaveNormal(), grain = makeGrainNormal();
+    var fabRough = makeRoughness(0.86, 0.16), linRough = makeRoughness(0.92, 0.12);
+    /* The repeats set how fine the cloth reads. Upholstery thread is
+       about a millimetre, so these are deliberately tight. */
+    function tile(t, n) { t.repeat.set(n, n); return t; }
+    tile(weave, 9); tile(fabRough, 7); tile(linRough, 8); grain.repeat.set(1, 3);
     var M = {
-      fabric: new THREE.MeshStandardMaterial({ color: 0xb98e72, roughness: 0.95, metalness: 0, bumpMap: weave, bumpScale: 0.6 }),
-      finish: new THREE.MeshStandardMaterial({ color: 0x5b3f2f, roughness: 0.55, metalness: 0.02 }),
-      linen: new THREE.MeshStandardMaterial({ color: 0xefe9de, roughness: 1, metalness: 0, bumpMap: weave, bumpScale: 0.4 })
+      fabric: new THREE.MeshStandardMaterial({
+        roughness: 0.92, metalness: 0,
+        normalMap: weave, normalScale: new THREE.Vector2(1.0, 1.0),
+        roughnessMap: fabRough, envMapIntensity: 0.55
+      }),
+      finish: new THREE.MeshStandardMaterial({
+        roughness: 0.42, metalness: 0.03,
+        normalMap: grain, normalScale: new THREE.Vector2(0.3, 0.3),
+        envMapIntensity: 1.0
+      }),
+      linen: new THREE.MeshStandardMaterial({
+        roughness: 0.92, metalness: 0,
+        normalMap: weave, normalScale: new THREE.Vector2(0.7, 0.7),
+        roughnessMap: linRough, envMapIntensity: 0.45
+      })
     };
+    srgb(M.fabric.color, 0xb98e72);
+    srgb(M.finish.color, 0x5b3f2f);
+    srgb(M.linen.color, 0xefe9de);
 
     function readRug() {
       var v = getComputedStyle(document.documentElement).getPropertyValue("--rug").trim();
-      rugMat.color.set(v || "#D6C5AF");
+      srgb(rugMat.color, v || "#D6C5AF");
     }
     readRug();
     if (window.matchMedia) {
@@ -253,8 +380,8 @@
     }
 
     api.setColors = function (fabricHex, finishHex) {
-      M.fabric.color.set(fabricHex);
-      M.finish.color.set(finishHex);
+      srgb(M.fabric.color, fabricHex);
+      srgb(M.finish.color, finishHex);
     };
     api.setModel = function (cat, style, size) {
       if (group) {
