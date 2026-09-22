@@ -1,0 +1,50 @@
+# The Woodwright House: server settings for Apache (cPanel).
+# Every block is wrapped in IfModule, so if the host turns a module off
+# the site still serves instead of failing.
+
+# --- One address, always secure ----------------------------------------
+# Sends http:// and www. to https://thewoodwrighthouse.co.za, which is the
+# address in sitemap.xml. Search engines then count one site, not three.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://thewoodwrighthouse.co.za%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# --- Compression --------------------------------------------------------
+# The host already compresses HTML and CSS but not JavaScript, and
+# vendor/three.min.js is 590 KB. Compressed it is closer to 150 KB.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+  AddOutputFilterByType DEFLATE text/javascript application/javascript
+  AddOutputFilterByType DEFLATE application/json image/svg+xml
+</IfModule>
+
+# --- Caching ------------------------------------------------------------
+# Photographs and the 3D engine rarely change, so let the browser keep
+# them. Pages are kept briefly so edits show up the same day.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg               "access plus 1 year"
+  ExpiresByType image/png                "access plus 1 year"
+  ExpiresByType image/svg+xml            "access plus 1 year"
+  ExpiresByType text/css                 "access plus 7 days"
+  ExpiresByType text/javascript          "access plus 7 days"
+  ExpiresByType application/javascript   "access plus 7 days"
+  ExpiresByType text/html                "access plus 1 hour"
+  ExpiresDefault                         "access plus 1 day"
+</IfModule>
+
+# --- Keep the build notes off the web -----------------------------------
+# README.txt is for whoever maintains the site, not for visitors.
+<IfModule mod_authz_core.c>
+  <Files "README.txt">
+    Require all denied
+  </Files>
+</IfModule>
+
+# --- Tidy ---------------------------------------------------------------
+<IfModule mod_autoindex.c>
+  Options -Indexes
+</IfModule>
