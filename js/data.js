@@ -10,11 +10,16 @@
      your real workshop prices and rates.
      ------------------------------------------------------------------ */
   WH.CONFIG = {
-    WHATSAPP: "",       // Your number with country code, digits only, e.g. 27XXXXXXXXX. Empty: the customer picks the contact.
+    WHATSAPP: "27635002390",  // Your number with country code, digits only, e.g. 27XXXXXXXXX. Empty: the customer picks the contact.
     LEAD_WEEKS: "",     // e.g. "6 to 8". Empty shows [X].
     WARRANTY: "",       // e.g. "12 months". Empty shows [YOUR TERM].
     DEPOSIT_RATE: 0.5,  // 0.5 = 50%
-    CONTACT: { email: "sales@thewoodwrighthouse.co.za", phone: "", area: "", hours: "" },
+    CONTACT: {
+      email: "sales@thewoodwrighthouse.co.za",
+      phone: "063 500 2390",
+      area: "Noordwyk, Midrand",
+      hours: "Monday to Friday 9am to 5pm, Saturday 9am to 3pm, closed Sunday"
+    },
     BANK: { bank: "", name: "", number: "", branch: "" },
     DELIVERY: [
       { area: "Midrand", fee: 450 },
