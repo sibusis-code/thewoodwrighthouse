@@ -14,7 +14,7 @@
     LEAD_WEEKS: "",     // e.g. "6 to 8". Empty shows [X].
     WARRANTY: "",       // e.g. "12 months". Empty shows [YOUR TERM].
     DEPOSIT_RATE: 0.5,  // 0.5 = 50%
-    CONTACT: { email: "", phone: "", area: "", hours: "" },
+    CONTACT: { email: "sales@thewoodwrighthouse.co.za", phone: "", area: "", hours: "" },
     BANK: { bank: "", name: "", number: "", branch: "" },
     DELIVERY: [
       { area: "Midrand", fee: 450 },
