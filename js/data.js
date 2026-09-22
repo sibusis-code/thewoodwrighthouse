@@ -11,8 +11,8 @@
      ------------------------------------------------------------------ */
   WH.CONFIG = {
     WHATSAPP: "27635002390",  // Your number with country code, digits only, e.g. 27XXXXXXXXX. Empty: the customer picks the contact.
-    LEAD_WEEKS: "",     // e.g. "6 to 8". Empty shows [X].
-    WARRANTY: "",       // e.g. "12 months". Empty shows [YOUR TERM].
+    LEAD_WEEKS: "4 to 6",   // PROVISIONAL. Check this against what your workshops actually deliver.
+    WARRANTY: "12 months",  // PROVISIONAL. This is a promise to your customers, so confirm it.
     DEPOSIT_RATE: 0.5,  // 0.5 = 50%
     CONTACT: {
       email: "sales@thewoodwrighthouse.co.za",

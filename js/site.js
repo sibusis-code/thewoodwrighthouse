@@ -131,6 +131,32 @@
   function saveQuote() {
     try { window.localStorage.setItem(QUOTE_KEY, JSON.stringify(quote)); } catch (e) {}
   }
+  /* The bank rows, only when there are real details to show. Until
+     CONFIG.BANK is filled in, the rows stay hidden and the customer is
+     told the details come with the written quote, which is true and is
+     a great deal better than showing them [ACCOUNT NUMBER]. */
+  function showBank(b) {
+    var dd = $("#bBank");
+    if (!dd) return;
+    var dl = dd.parentNode;
+    var note = $("#bankNote");
+    if (!note) {
+      note = el("p", "note");
+      note.id = "bankNote";
+      dl.parentNode.insertBefore(note, dl.nextSibling);
+    }
+    var rows = [["#bBank", b.bank], ["#bName", b.name], ["#bNum", b.number], ["#bBranch", b.branch]];
+    var ready = rows.every(function (r) { return !!r[1]; });
+    rows.forEach(function (r) {
+      var cell = $(r[0]), label = cell.previousElementSibling;
+      cell.hidden = !ready;
+      if (label) label.hidden = !ready;
+      cell.textContent = r[1] || "";
+    });
+    note.hidden = ready;
+    note.textContent = ready ? "" :
+      "We'll send you our banking details with your written quote. Please don't pay before then.";
+  }
   function itemsTotal() { return quote.reduce(function (s, q) { return s + q.price; }, 0); }
   function deliveryNow() {
     var d = areaNow();
@@ -179,10 +205,7 @@
     var b = CONFIG.BANK, ref = getRef();
     $("#dep").hidden = !has;
     $("#depAmt").textContent = fmt(depositNow()) + " (" + Math.round(CONFIG.DEPOSIT_RATE * 100) + "%)";
-    $("#bBank").textContent = orPlaceholder(b.bank, "[YOUR BANK]");
-    $("#bName").textContent = orPlaceholder(b.name, "[ACCOUNT NAME]");
-    $("#bNum").textContent = orPlaceholder(b.number, "[ACCOUNT NUMBER]");
-    $("#bBranch").textContent = orPlaceholder(b.branch, "[BRANCH CODE]");
+    showBank(b);
     $("#bRef").textContent = ref;
     setLink($("#wa"), WH.waLink(summary()), has);
     setLink($("#paid"), WH.waLink("Hi The Woodwright House, I've paid my deposit of " + fmt(depositNow()) + ". Reference: " + ref + ". Proof of payment attached."), has);
