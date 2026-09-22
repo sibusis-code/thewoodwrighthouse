@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Our work | The Woodwright House</title>
+<meta name="description" content="Photographs of headboards, beds, couches and chairs built to order by The Woodwright House. Browse finished pieces and have one made in your size.">
+<meta name="theme-color" content="#EDE4D8">
+<meta property="og:title" content="Our work | The Woodwright House">
+<meta property="og:description" content="Photographs of headboards, beds, couches and chairs built to order by The Woodwright House. Browse finished pieces and have one made in your size.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Woodwright House">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%B5%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif&display=swap">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body data-page="gallery">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap bar">
+    <a class="brand" href="index.html">The Woodwright House</a>
+    <button class="navbtn" id="navToggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">
+      <svg width="22" height="14" viewBox="0 0 22 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M1 1h20M1 7h20M1 13h20"/></svg>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="shop.html" data-nav="shop">Shop</a>
+      <a href="gallery.html" data-nav="gallery" aria-current="page">Our work</a>
+      <a href="fabrics.html" data-nav="fabrics">Fabrics</a>
+      <a href="how-it-works.html" data-nav="how-it-works">How it works</a>
+      <a href="about.html" data-nav="about">About</a>
+      <a href="contact.html" data-nav="contact">Contact</a>
+    </nav>
+    <button class="quote-btn" type="button" data-open="quote">Your quote <span class="count quote-count">0</span></button>
+  </div>
+</header>
+<main id="main">
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <h1 class="title">Our work</h1>
+      <p class="lede">Pieces built by the workshops we work with. Every one was made to order, so yours can be made in your size, your fabric and your finish. Seen something you like? Send us the piece and we'll quote it.</p>
+    </div>
+    <div class="chips" id="shotFilters" role="group" aria-label="Filter by kind of piece"></div>
+    <p class="shot-count" id="shotCount" role="status"></p>
+    <div class="shots" id="shots"></div>
+    <div class="actions">
+      <a class="btn" href="shop.html">Design your own in 3D</a>
+      <a class="btn ghost" href="contact.html">Ask about a piece</a>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Want one like this, in your size?</h2>
+    <p>Tell us which piece caught your eye and the size you need, and we'll come back with a price and a build time.</p>
+    <div class="actions">
+      <a class="btn light" href="contact.html">Contact us</a>
+      <button class="btn ghost" type="button" data-open="swatches">Order swatches</button>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <p class="foot-brand">The Woodwright House</p>
+        <p>Custom furniture, made to order by skilled local workshops.</p>
+      </div>
+      <div>
+        <h3>Shop</h3>
+        <ul>
+          <li><a href="shop.html?cat=headboard">Headboards</a></li>
+          <li><a href="shop.html?cat=bed">Beds</a></li>
+          <li><a href="shop.html?cat=couch">Couches</a></li>
+          <li><a href="shop.html?cat=chair">Chairs</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Company</h3>
+        <ul>
+          <li><a href="gallery.html">Our work</a></li>
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="fabrics.html">Fabrics and finishes</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="policies.html">Delivery, warranty and privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Get in touch</h3>
+        <ul>
+          <li><a data-cfg="email" data-cfg-href="mailto"></a></li>
+          <li><a data-cfg="phone" data-cfg-href="tel"></a></li>
+          <li data-cfg="area"></li>
+          <li><a href="contact.html">Send us a message</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; 2026 The Woodwright House</span>
+      <span>Made to order in South Africa</span>
+    </div>
+  </div>
+</footer>
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="dlgTitle">Your quote</h2>
+      <button class="tool" id="closeQuote" type="button" aria-label="Close quote">Close</button>
+    </div>
+    <ul class="items" id="items"></ul>
+    <label class="f">Delivery area<select class="area-select"></select></label>
+    <p class="est area-est"></p>
+    <div class="lines">
+      <div><span>Items</span><span id="subtotal">R0</span></div>
+      <div><span id="areaLine">Delivery</span><span id="delivery">R0</span></div>
+    </div>
+    <div class="total"><span>Estimated total</span><span id="total">R0</span></div>
+    <div class="dialog-actions">
+      <a class="btn" id="wa" href="#" target="_blank" rel="noopener">Send on WhatsApp</a>
+      <button class="btn ghost" id="copy" type="button">Copy summary</button>
+    </div>
+    <p class="status" id="status" role="status"></p>
+    <details class="dep" id="dep">
+      <summary>Ready to pay your deposit?</summary>
+      <p>Only pay once we've confirmed your final quote in writing. Use your reference so we can match the payment.</p>
+      <dl>
+        <dt>Deposit</dt><dd id="depAmt"></dd>
+        <dt>Bank</dt><dd id="bBank"></dd>
+        <dt>Account name</dt><dd id="bName"></dd>
+        <dt>Account number</dt><dd id="bNum"></dd>
+        <dt>Branch code</dt><dd id="bBranch"></dd>
+        <dt>Reference</dt><dd id="bRef"></dd>
+      </dl>
+      <a class="btn ghost small" id="paid" href="#" target="_blank" rel="noopener">I've paid, send proof</a>
+      <p>Card payments are coming soon.</p>
+    </details>
+  </div>
+</dialog>
+
+<dialog id="sdlg" aria-labelledby="sdlgTitle">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 id="sdlgTitle">Order swatches</h2>
+      <button class="tool" id="closeSw" type="button" aria-label="Close swatch request">Close</button>
+    </div>
+    <p class="lead">Tick the fabrics you'd like to see. We'll send small samples so you can check the colours in your own light.</p>
+    <div class="checks" id="swChecks"></div>
+    <label class="f">Your name<input type="text" id="swName" autocomplete="name"></label>
+    <label class="f">Delivery address<textarea id="swAddr" autocomplete="street-address"></textarea></label>
+    <label class="f">Phone number<input type="tel" id="swPhone" autocomplete="tel"></label>
+    <a class="btn" id="swSend" href="#" target="_blank" rel="noopener">Send on WhatsApp</a>
+    <p class="status" id="swStatus" role="status"></p>
+  </div>
+</dialog>
+<script src="js/data.js"></script>
+<script src="js/site.js"></script>
+</body>
+</html>
